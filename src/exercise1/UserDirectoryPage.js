@@ -16,6 +16,7 @@ function UserDirectoryPage() {
     .then((response) => response.json())
     .then((data) => {
         setUsers(data);
+        console.log('data fetched')
     })
     .catch((e) => {
       console.log('Failed to fetch data: ' , e.message);
@@ -24,22 +25,52 @@ function UserDirectoryPage() {
 
   }
 
-  useEffect(() => { retrieveData();},[users]);
+  useEffect(() => { retrieveData();},[]);
 
-  function handleDeleteClick(userId) {
-    console.log('TODO: delete the user with id', userId);
+  async function handleDeleteClick(userId) {
+    console.log('Delete: ', userId );
+    try {
+      const response = await fetch(
+        `https://69a1df572e82ee536fa26e9c.mockapi.io/users_api/${userId}`,
+        { method: 'DELETE' }
+      );
+
+      if (response.ok) {
+      setUsers(users.filter(user => user.id !== userId));
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   function handleSortByGroupClick() {
-    console.log('TODO: sort users by user_group');
+    console.log('sort users by group');
+
+    const sortedByGroup = [...users].sort((a, b) => Number(a.user_group) - Number(b.user_group));
+    setUsers(sortedByGroup);
+    setSortBy("group");
   }
 
   function handleSortByIdClick() {
-    console.log('TODO: sort users by id');
-  }
+    console.log('sort users by id');
+
+    const sortedById = [...users].sort((a, b) => Number(a.id) - Number(b.id));
+    setUsers(sortedById);
+    setSortBy("ID");
+}
 
   function handleViewToggleClick() {
-    console.log('TODO: switch between grid and list layouts');
+    console.log('switch between grid and list layouts');
+    if (viewMode == 'grid'){
+      setViewMode('list')
+      console.log(viewMode)
+    }
+    else {
+      setViewMode('grid')
+      console.log(viewMode)
+
+    }
   }
 
   return (
@@ -50,7 +81,12 @@ function UserDirectoryPage() {
 
       <section className="panel">
         <h2>Controls</h2>
-        <Controls />
+        <Controls
+          onDeleteClick={handleDeleteClick}
+          onSortByGroupClick={handleSortByGroupClick}
+          onSortByIdClick={handleSortByIdClick}
+          onViewToggleClick={handleViewToggleClick}
+        />
       </section>
 
       <section className="panel">
